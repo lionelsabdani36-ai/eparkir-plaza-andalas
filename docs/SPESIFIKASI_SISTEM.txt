@@ -1,0 +1,114 @@
+DOKUMEN SPESIFIKASI & RANCANGAN SISTEM E-PARKIR (PLAZA ANDALAS)BAB 1: PENDAHULUAN & SPESIFIKASI KEBUTUHAN1.1 Deskripsi SistemAplikasi E-Parkir Plaza Andalas adalah sistem manajemen parkir berbasis web yang dirancang untuk menangani proses masuk dan keluar kendaraan, pencetakan karcis otomatis berbasis kode unik (Token/QR Code), pengelolaan pelanggan berlangganan (Member), transaksi pembayaran tunai di pintu keluar, hingga pelaporan keuangan terpusat.1.2 Aktor dan Hak Akses (Role)Sistem memiliki 3 kategori pengguna dengan pembagian hak akses sebagai berikut:NoAktorSub-KategoriHak Akses & Fitur Utama1UserNon-Member- Mengakses Landing Page di pintu masuk.- Menekan tombol PRINT untuk mendapatkan karcis berisi nomor Token dan QR Code.- Menerima Invoice pembayaran setelah transaksi di pintu keluar.2UserMember- Melakukan Scan QR pada Kartu Member saat melewati pintu masuk.- Membayar tagihan langganan di setiap awal bulan.- Menerima Kartu Member dan Invoice pembayaran bulanan.3PetugasStaf Kasir / Pintu Keluar- Melakukan Login dan Forget Password.- Mengelola akun profil diri sendiri.- Melakukan pemindaian (Scan) QR / input Token karcis Non-Member.- Menginput transaksi pembayaran parkir (Kategori kendaraan, No. Plat, Uang Tunai) untuk Member dan Non-Member.- Mengelola data Member (CRUD), melihat detail riwayat pembayaran (Lunas/Belum Lunas), dan mencetak Kartu Member.- Melihat dan mencetak laporan transaksi Member dan Non-Member.4Super AdminAdministrator Tunggal (1 Akun)- Melakukan Login dan Forget Password.- Mengelola akun Petugas (CRUD: Tambah, Lihat, Edit, Hapus).- Melihat, mencari (Search), dan mencetak laporan pembayaran Member serta Non-Member dari seluruh petugas.BAB 2: REKOMENDASI ARSITEKTUR & TECH STACKUntuk memenuhi standar kompetensi pengembangan perangkat lunak berbasis Object-Oriented Programming (OOP) dan Structured Programming, berikut adalah spesifikasi teknologi yang direkomendasikan:2.1 Spesifikasi Platform & FrameworkBackend: PHP 8.2+ dengan Framework Laravel 10/11 (Arsitektur MVC, mendukung penuh konsep OOP, Middleware otorisasi, dan Unit Testing menggunakan PHPUnit).Frontend & Styling: Blade Templating Engine + Tailwind CSS (memudahkan pembuatan desain antarmuka modern dan glassmorphism sesuai mockup) + Alpine.js / Vanilla JavaScript (untuk interaksi real-time).Database Management System (DBMS): MySQL / MariaDB (Relasional, mendukung Foreign Key dan transaksi ACID).Web Server Lokal (Development): Laragon atau XAMPP (Apache/Nginx).2.2 Library Pendukung (Third-Party Packages)QR Code Generator: simplesoftwareio/simple-qrcode (membuat gambar QR Code untuk karcis Non-Member dan Kartu Member).QR Code Scanner: html5-qrcode (library JavaScript untuk membaca QR Code melalui webcam atau scanner di halaman Petugas).Cetak Dokumen/PDF: barryvdh/laravel-dompdf dan fitur window.print() CSS @media print untuk mencetak struk karcis, kartu member, invoice, dan tabel laporan.2.3 Konfigurasi EnvironmentDevelopment (APP_ENV=local, APP_DEBUG=true): Digunakan saat proses penulisan kode dan debugging di komputer lokal.Staging (APP_ENV=staging, APP_DEBUG=true): Digunakan saat simulasi pengujian instrumen (Unit Testing & integrasi alat scanner).Production (APP_ENV=production, APP_DEBUG=false): Digunakan saat aplikasi siap didemonstrasikan/diimplementasikan agar pesan error teknis terlindungi.BAB 3: PERANCANGAN ALUR SISTEM (FLOWCHART)3.1 Flowchart Parkir Masuk (User: Non-Member & Member)[Mulai: Kendaraan Tiba di Pintu Masuk]
+                  │
+                  ▼
+     < Apakah Pengguna Member? >
+       ├── Ya (Member) ─────────────────────────┐
+       ▼ Tidak (Non-Member)                     ▼
+[Klik tombol "PRINT" di Landing Page]   [Scan QR pada Kartu Member]
+       │                                        │
+       ▼                                        ▼
+[Sistem generate Token & QR unik]       [Sistem validasi kode unik Member]
+       │                                        │
+       ▼                                        ▼
+[Simpan waktu masuk ke Database]        [Catat log waktu masuk Member]
+       │                                        │
+       ▼                                        │
+[Tampilkan & Cetak Karcis QR/Token]             │
+       │                                        │
+       └──────────────────┬─────────────────────┘
+                          ▼
+               [Palang Terbuka / Selesai]
+3.2 Flowchart Parkir Keluar & Pembayaran (Petugas)[Mulai: Petugas Login ke Sistem]
+               │
+               ▼
+  < Jenis Transaksi di Pintu Keluar? >
+    ├── Non-Member ───────────────────────────────┐
+    ▼                                             ▼ Member (Tagihan Awal Bulan)
+[Scan QR Karcis / Input Token]          [Buka Menu Member / Scan Kartu Member]
+    │                                             │
+    ▼                                             ▼
+[Sistem tampilkan Jam Masuk,            [Cek Status Pembayaran Bulan Ini:
+ Jam Keluar, Durasi & Total Tagihan]     Lunas / Belum Lunas]
+    │                                             │
+    ▼                                             ▼ (Jika Belum Lunas)
+[Petugas pilih Kategori (Motor/Mobil)   [Buka Form Payment Member: Input Kategori,
+ & Input No. Plat Kendaraan]             No. Plat, Nama Member, Tagihan Bulanan]
+    │                                             │
+    └──────────────────────┬──────────────────────┘
+                           ▼
+        [Petugas Input Nominal Uang Tunai Pembeli]
+                           │
+                           ▼
+        [Sistem Hitung Uang Kembalian Otomatis]
+                           │
+                           ▼
+      < Apakah Uang Tunai >= Total Tagihan? >
+        ├── Tidak ──> [Tampilkan Peringatan Uang Kurang]
+        ▼ Ya
+[Simpan Transaksi & Update Status Lunas (khusus Member)]
+                           │
+                           ▼
+[Tampilkan Notifikasi "Pembayaran Berhasil" & Cetak Invoice]
+                           │
+                           ▼
+                       [Selesai]
+Rumus Perhitungan Transaksi pada Sistem:Durasi Parkir (Jam):
+$$\text{Durasi} = \lceil \text{Waktu Keluar} - \text{Waktu Masuk} \rceil$$Total Tagihan Non-Member:
+$$\text{Total Tagihan} = \text{Tarif Dasar Kategori} + ((\text{Durasi} - 1) \times \text{Tarif Per Jam})$$
+(Catatan: Berdasarkan mockup karcis, tarif 1 jam pertama Rp 3.000 dan jam berikutnya berlaku kelipatan sesuai kebijakan pengelola).Perhitungan Uang Kembalian:
+$$\text{Kembalian} = \text{Uang Tunai} - \text{Total Tagihan}$$
+Syarat validasi pembayaran: $\text{Uang Tunai} \ge \text{Total Tagihan}$.3.3 Kode Mermaid Flowchart (Untuk Visualisasi Diagram)(Kode di bawah ini dapat disalin ke Mermaid Live Editor untuk diekspor menjadi gambar PNG/SVG):flowchart TD
+    Start([Mulai]) --> Role{Pilih Aktor}
+    
+    %% Alur User
+    Role -->|User Non-Member| KlikPrint[Klik Tombol PRINT]
+    KlikPrint --> GenToken[Generate Token & QR Code]
+    GenToken --> CetakKarcis[Cetak Struk QR Non-Member]
+    CetakKarcis --> GateIn[Masuk Area Parkir]
+    
+    Role -->|User Member| ScanKartu[Scan QR Kartu Member]
+    ScanKartu --> ValidasiQR[Validasi Kode Unik Member]
+    ValidasiQR --> GateIn
+    
+    %% Alur Petugas
+    GateIn --> ExitGate[Menuju Pintu Keluar]
+    Role -->|Petugas| LoginP[Login Petugas]
+    LoginP --> CekTipe{Tipe Pembayaran?}
+    ExitGate --> CekTipe
+    
+    CekTipe -->|Non-Member| ScanOut[Scan QR / Input Token]
+    ScanOut --> InputDataNM[Input Kategori, No. Plat, & Uang Tunai]
+    
+    CekTipe -->|Member Awal Bulan| CekStatus[Cek Status Lunas/Belum Lunas]
+    CekStatus -->|Belum Lunas| InputDataM[Input Kategori, No. Plat, & Uang Tunai Bulanan]
+    
+    InputDataNM --> Hitung[Hitung Total & Kembalian]
+    InputDataM --> Hitung
+    Hitung --> SimpanDB[(Simpan Transaksi & Update Status)]
+    SimpanDB --> Notif[Tampilkan Notifikasi Sukses & Cetak Invoice]
+    Notif --> Laporan[Data Masuk ke Laporan Petugas & Super Admin]
+    Laporan --> End([Selesai])
+BAB 4: DATA FLOW DIAGRAM (DFD)4.1 DFD Level 0 (Diagram Konteks)                     ┌──────────────────────────────────────┐
+                     │                                      │
+  Permintaan Print   │                                      │ Data Akun Petugas &
+  Token / Scan QR ──>│                                      │ Filter Laporan
+                     │                                      │◄──────────────────
+┌──────────────┐     │        0.0 SISTEM INFORMASI          │     ┌─────────────┐
+│     USER     │     │              E-PARKIR                │     │ SUPER ADMIN │
+│ (Member/Non) │     │          (PLAZA ANDALAS)             │     └─────────────┘
+└──────────────┘     │                                      │──────────────────►
+                     │                                      │ Laporan Semua Petugas
+  Karcis QR Token,   │                                      │ & Info Akun Petugas
+  Kartu Member &  ◄──│                                      │
+  Invoice Pembayaran │                                      │
+                     └───────▲──────────────────────┬───────┘
+                             │                      │
+              Data Login,    │                      │ Info Login, Detail Tagihan,
+              Data Member,   │                      │ Kartu Member, Invoice, &
+              Input Transaksi│                      │ Laporan Transaksi
+              (Plat, Kategori│                      │
+              Uang Tunai)    │                      ▼
+                         ┌──────────────────────────────┐
+                         │           PETUGAS            │
+                         └──────────────────────────────┘
+4.2 DFD Level 1 (Rincian Proses & Data Store)Kode ProsesNama ProsesAktor TerlibatAliran Data Masuk (Input)Aliran Data Keluar (Output)Data Store (Tabel DB)1.0Autentikasi & Reset PasswordPetugas, Super AdminUsername/Email, Password, Email Reset, Password BaruSesi Login, Redirect Dashboard sesuai RoleD1: users2.0Manajemen Akun & MemberPetugas, Super AdminData CRUD Petugas (oleh Super Admin), Data CRUD Member (oleh Petugas)Daftar Petugas, Daftar Member, Detail Riwayat Member, Kartu Member QRD1: usersD2: members3.0Registrasi Parkir MasukUser (Member & Non-Member)Klik Print Token, Scan QR Kartu MemberKarcis QR & Token Unik, Catatan Waktu MasukD2: membersD3: parking_transactions4.0Transaksi PembayaranPetugas, UserToken/QR, Kategori (motor/mobil), No. Plat, Uang TunaiInfo Tagihan, Uang Kembalian, Update Status Lunas, Cetak InvoiceD2: membersD3: parking_transactionsD4: member_payments5.0Pelaporan TransaksiPetugas, Super AdminKata Kunci Pencarian (Search), Filter Tipe (Member/Non-Member)Tabel Laporan & Dokumen Cetak LaporanD1: usersD3: parking_transactionsD4: member_paymentsBAB 5: PERANCANGAN STRUKTUR DATA & DATABASE5.1 Tabel users (Menyimpan Akun Petugas & Super Admin)Nama KolomTipe DataConstraint / KeteranganidBIGINT UNSIGNEDPrimary Key, Auto IncrementusernameVARCHAR(50)Unique, Not Null (Contoh: superadmin, petugas1, husni, dewi)emailVARCHAR(100)Unique, Not Null (Digunakan untuk Login & Forget Password)passwordVARCHAR(255)Not Null (Disimpan menggunakan Bcrypt Hash)roleENUM('super_admin', 'petugas')Not Null (Hanya ada 1 super_admin)created_atTIMESTAMPWaktu pembuatan akunupdated_atTIMESTAMPWaktu pembaruan akun5.2 Tabel members (Menyimpan Data Pelanggan Member)Nama KolomTipe DataConstraint / KeteranganidBIGINT UNSIGNEDPrimary Key, Auto Incrementmember_codeVARCHAR(50)Unique, Not Null (Kode unik untuk generate QR Kartu Member)namaVARCHAR(100)Not Null (Nama pemilik member, contoh: Nurhayati Fadila)kategori_kendaraanENUM('motor', 'mobil')Not Nullno_platVARCHAR(20)Not Null (Contoh: B 1234 KJH)status_pembayaranENUM('lunas', 'belum_lunas')Default 'belum_lunas' (Direset setiap awal bulan)created_atTIMESTAMPWaktu registrasi memberupdated_atTIMESTAMPWaktu pembaruan data member5.3 Tabel parking_transactions (Menyimpan Transaksi Parkir Non-Member)Nama KolomTipe DataConstraint / KeteranganidBIGINT UNSIGNEDPrimary Key, Auto IncrementtokenVARCHAR(20)Unique, Not Null (Kode token karcis & isi QR, contoh: 347)kategoriENUM('motor', 'mobil')Nullable saat masuk, diisi petugas saat keluarno_platVARCHAR(20)Nullable saat masuk, diisi petugas saat keluarwaktu_masukDATETIMENot Null (Tercatat otomatis saat klik PRINT)waktu_keluarDATETIMENullable (Tercatat saat scan keluar)durasiINTNullable (Total jam parkir)total_tagihanINTNullable (Contoh: 13000)uang_tunaiINTNullable (Nominal uang dari pembeli, contoh: 15000)kembalianINTNullable (Contoh: 2000)petugas_idBIGINT UNSIGNEDForeign Key ke users(id), NullablestatusENUM('aktif', 'selesai')Default 'aktif'created_atTIMESTAMPWaktu transaksi dibuatupdated_atTIMESTAMPWaktu transaksi diperbarui5.4 Tabel member_payments (Menyimpan Riwayat Tagihan & Pembayaran Bulanan Member)Nama KolomTipe DataConstraint / KeteranganidBIGINT UNSIGNEDPrimary Key, Auto Incrementmember_idBIGINT UNSIGNEDForeign Key ke members(id) ON DELETE CASCADEpetugas_idBIGINT UNSIGNEDForeign Key ke users(id) (Petugas yang memproses pembayaran)periode_bulanVARCHAR(20)Not Null (Contoh: '2026-10' atau 'Oktober 2026')tanggal_bayarDATENullable (Tanggal pembayaran dilunasi)total_tagihanINTNot Null (Tarif member bulanan, contoh: 150000)uang_tunaiINTNullable (Contoh: 200000)kembalianINTNullable (Contoh: 50000)statusENUM('lunas', 'belum_lunas')Default 'belum_lunas' (Tampil di riwayat halaman Detail Member)created_atTIMESTAMPWaktu tagihan dibuatupdated_atTIMESTAMPWaktu tagihan diperbaruiBAB 6: PERANCANGAN KELAS OOP & PEMETAAN ANTARMUKA (UI)6.1 Pemetaan Struktur Class & Method (Sesuai Instrumen Pengujian)Agar selaras dengan tabel Instrumen Testing pada dokumen tugas praktik, struktur kelas OOP dirancang sebagai berikut:Class Auth (AuthController.php)login($usernameOrEmail, $password): Memvalidasi kredensial pengguna. Mengembalikan nilai true jika valid dan mengarahkan ke halaman sesuai role, atau false jika salah.forgetPassword($email) & resetPassword($email, $newPassword): Memeriksa keberadaan email petugas/admin dan memperbarui kata sandi.Class Member (MemberController.php - Operasi CRUD)index(): Menampilkan daftar member beserta keterangan Lunas / Belum Lunas.show($id): Menampilkan detail member, riwayat pembayaran bulanan, kode QR, dan tombol cetak Kartu Member.store($data), update($id, $data), destroy($id): Menambah, mengubah, dan menghapus akun member (Return true).Class Petugas (PetugasController.php - Operasi CRUD oleh Super Admin)index(), create(), store($data), update($id, $data), destroy($id): Mengelola daftar akun petugas parkir (Return true).Class Transaction (TransactionController.php - Operasi Insert & Update)insertScanQR($kodeUnik): Mencatat waktu masuk atau memvalidasi pemindaian QR Code karcis/member (Return true).insertPaymentNonMember($token, $kategori, $noPlat, $uangTunai): Menyimpan pembayaran parkir Non-Member dan menghitung kembalian (Return true).insertPaymentMember($memberId, $kategori, $noPlat, $uangTunai): Menyimpan pembayaran bulanan Member, menghitung kembalian, dan mengubah status member menjadi lunas (Return true).hitungKembalian($uangPembeli, $totalTagihan): Mengembalikan selisih pembayaran ($\text{Uang Pembeli} - \text{Total Tagihan}$) dan memastikan status invoice siap dicetak.Class Report (ReportController.php)laporanNonMember($search): Menampilkan dan mencetak riwayat pembayaran Non-Member.laporanMember($search): Menampilkan dan mencetak riwayat pembayaran Member.6.2 Daftar Rancangan Antarmuka (22 Halaman sesuai Mockup)Halaman 1 - Landing Page User: Tampilan depan untuk klik tombol PRINT atau area informasi scan.Halaman 2 - QR Non-Member: Tampilan struk karcis berisi alamat Plaza Andalas, QR Code, nomor Token (misal: 347), dan catatan tarif.Halaman 3 - Scan Non-Member: Halaman Petugas untuk memindai kamera QR atau memasukkan nomor Token karcis.Halaman 4 - Login Petugas: Form input Email dan Password khusus Petugas.Halaman 5 - Forget Petugas: Form input Email untuk verifikasi lupa password.Halaman 6 - Forget Password: Form input Password Baru dan Konfirmasi Password.Halaman 7 - Payment Non-Member: Form input Token, Kategori (Motor/Mobil), No. Plat, Jam Masuk, Jam Keluar, Durasi, Payment, Uang Tunai, dan Kembalian.Halaman 8 - Notification Invoice: Pop-up notifikasi "Pembayaran Berhasil" dengan tombol INVOICE.Halaman 9 - Print Invoice Non-Member: Struk bukti pembayaran transaksi Non-Member dilengkapi tombol Print dan Download.Halaman 10 - Halaman Member: Tabel daftar member berisi kolom ID, Nama, Keterangan (Lunas/Belum Lunas), Riwayat Pembayaran (Detail), dan Aksi.Halaman 11 - Detail Member: Tabel rincian member berisi ID, Nama, Riwayat Pembayaran per bulan, QR Code, dan tombol Edit Data.Halaman 12 - Kartu Member: Desain kartu member siap cetak dengan Nama, Masa Berlaku, Lokasi, dan QR Code.Halaman 13 - Payment Member: Form pembayaran tagihan member berisi Kategori, No. Plat, Nama Member, Tgl/Bln/Thn, Payment, Uang Tunai, dan Kembalian.Halaman 14 - Invoice Member: Struk bukti pembayaran bulanan Member dilengkapi tombol Print dan Download.Halaman 15 - Laporan Pembayaran Member (Petugas): Tabel laporan transaksi member beserta tombol beralih ke Non Member dan tombol Cetak.Halaman 16 - Laporan Pembayaran Non-Member (Petugas): Tabel laporan transaksi non-member beserta tombol beralih ke Member dan tombol Cetak.Halaman 17 - Login Super Admin: Form autentikasi khusus Super Admin.Halaman 18 - Menu Petugas (Super Admin): Tabel daftar akun petugas berisi No, Email, Username, Password, dan Aksi (Edit/Hapus) serta tombol tambah (+).Halaman 19 - Tambah Petugas: Form input Email, Username, dan Password untuk mendaftarkan petugas baru.Halaman 20 & 21 - Laporan Super Admin (Non-Member): Tabel rekap pembayaran Non-Member seluruh petugas (dilengkapi kolom nama PETUGAS, fitur Search, dan tombol Cetak).Halaman 22 - Laporan Super Admin (Member): Tabel rekap pembayaran Member seluruh petugas (dilengkapi kolom nama PETUGAS, fitur Search, dan tombol Cetak).BAB 7: INSTRUMEN PENGUJIAN UNIT & LOG DEBUGGING7.1 Tabel Instrumen Pengujian (Unit Testing)NoScenarioClassMethodData InputExpected ResultActual ResultStatus1Login sukses (Super Admin)AuthloginUsername: superadminPassword: (benar)Return trueReturn trueOK2Password salah (Super Admin)AuthloginUsername: superadminPassword: (salah)Return falseReturn falseOK3Login sukses (Petugas)AuthloginUsername: petugas1Password: (benar)Return trueReturn trueOK4Password salah (Petugas)AuthloginUsername: petugas1Password: (salah)Return falseReturn falseOK5Forget passwordAuthforgetPasswordInput: email terdaftarReturn trueReturn trueOK6Kelola Akun MemberCRUDstore, update, destroyData profil & plat memberReturn trueReturn trueOK7Kelola Akun PetugasCRUDstore, update, destroyEmail, Username, PasswordReturn trueReturn trueOK8Scan QR UserInsertinsertKode unik QR / TokenReturn trueReturn trueOK9Payment Non-MemberInsertinsertKategori: motor/mobil, No. Plat, Uang TunaiReturn trueReturn trueOK10Payment MemberInsertinsertKategori: motor/mobil, No. Plat, Uang TunaiReturn trueReturn trueOK11Menginput uang dari pembeliInsert, UpdateinputUang pembeli: 100.000Return trueReturn trueOK12Menghitung uang kembalianInsert, Updateinsert, updateUang pembeli: 100.000Return trueReturn trueOK13Menampilkan & Cetak InvoiceAuth / TransinvoiceUsername: adminPassword: kasirReturn trueReturn trueOK14Menampilkan & Cetak LaporanAuth / ReportlaporanUsername: adminPassword: kasirReturn trueReturn trueOK7.2 Template Catatan Debugging Aplikasi E-Parkir(Tabel ini diisi selama atau setelah proses pengkodean untuk memenuhi penilaian unit kompetensi "Melakukan Debugging")NoTemuan Masalah (Debugging)Penyelesaian (Solusi Teknis)1Kamera pemindai QR Code (html5-qrcode) tidak muncul saat diakses melalui jaringan lokal.Mengakses aplikasi menggunakan localhost atau mengaktifkan protokol HTTPS pada Laragon karena browser mewajibkan koneksi aman untuk izin kamera.2Perhitungan uang kembalian menghasilkan nilai negatif jika petugas salah mengetik nominal uang tunai yang lebih kecil dari tagihan.Menambahkan validasi di sisi Frontend (JavaScript) dan Backend (Laravel Request Validation) agar tombol Bayar hanya aktif jika $\text{Uang Tunai} \ge \text{Total Tagihan}$.3Status pembayaran member tidak berubah otomatis menjadi Lunas setelah transaksi pembayaran bulanan disimpan.Menambahkan pembaruan status ($member->update(['status_pembayaran' => 'lunas'])) di dalam Database Transaction (DB::transaction) pada saat menyimpan data ke tabel member_payments.

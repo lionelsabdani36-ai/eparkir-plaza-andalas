@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagram Arsitektur E-Parkir Plaza Andalas (Draw.io XML & Viewer)</title>
+  <meta name="description" content="Rancangan Flowchart dan Data Flow Diagram (DFD Level 0 & Level 1) Sistem Informasi E-Parkir Plaza Andalas untuk draw.io / diagrams.net.">
+  <link rel="icon" type="image/png" href="/assets/duck-emblem.png">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-void: #060913;
+      --bg-surface: #0a1120;
+      --bg-card: #0d172a;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(0, 210, 255, 0.35);
+      --cyan-primary: #00d2ff;
+      --amber-accent: #f59e0b;
+      --emerald-live: #10b981;
+      --rose-alert: #f43f5e;
+      --text-white: #ffffff;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+    body { background-color: var(--bg-void); color: var(--text-white); font-family: var(--font-sans); min-height: 100vh; line-height: 1.6; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+    header.topbar {
+      height: 70px;
+      background: rgba(6, 9, 19, 0.94);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+    }
+    .topbar-inner { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text-white); }
+    .brand-logo { width: 38px; height: 38px; border-radius: var(--radius-sm); background: rgba(255,255,255,0.05); border: 1px solid var(--border-accent); display: flex; align-items: center; justify-content: center; }
+    .brand-logo img { width: 30px; height: 30px; }
+    .brand-name { font-weight: 800; font-size: 1.15rem; }
+    .brand-tag { font-size: 0.68rem; font-family: var(--font-mono); color: var(--cyan-primary); background: rgba(0, 210, 255, 0.08); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border-accent); }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 18px; min-height: 42px; font-size: 0.88rem; font-weight: 700; border-radius: var(--radius-sm); cursor: pointer; text-decoration: none; border: none; transition: all 0.2s ease; }
+    .btn-primary { background: var(--cyan-primary); color: #040812; border: 1px solid var(--cyan-primary); }
+    .btn-primary:hover { background: #33dcff; transform: translateY(-1px); }
+    .btn-secondary { background: var(--bg-surface); color: var(--text-white); border: 1px solid var(--border-accent); }
+    .btn-secondary:hover { background: var(--bg-card); border-color: var(--cyan-primary); }
+
+    .card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 28px; margin-bottom: 28px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border-subtle); flex-wrap: wrap; gap: 12px; }
+    .card-title { font-size: 1.35rem; font-weight: 800; color: var(--text-white); display: flex; align-items: center; gap: 10px; }
+
+    .tab-bar { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; overflow-x: auto; }
+    .tab-btn { background: transparent; border: none; color: var(--text-secondary); padding: 10px 16px; font-size: 0.9rem; font-weight: 700; cursor: pointer; border-radius: var(--radius-sm); transition: all 0.2s; white-space: nowrap; }
+    .tab-btn.active { color: #040812; background: var(--cyan-primary); }
+
+    .pane { display: none; }
+    .pane.active { display: block; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    .code-box { background: #030712; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 18px; font-family: var(--font-mono); font-size: 0.78rem; color: #93c5fd; max-height: 400px; overflow: auto; white-space: pre; position: relative; }
+    .copy-btn { position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.1); border: 1px solid var(--border-subtle); color: var(--text-white); padding: 6px 12px; font-size: 0.75rem; font-family: var(--font-mono); border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+    .copy-btn:hover { background: var(--cyan-primary); color: #040812; }
+
+    .step-box { background: var(--bg-card); border-left: 3px solid var(--cyan-primary); padding: 16px 20px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin-bottom: 14px; font-size: 0.9rem; }
+    .matrix-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.84rem; }
+    .matrix-table th { background: rgba(0, 210, 255, 0.08); color: var(--cyan-primary); text-align: left; padding: 10px 14px; border: 1px solid var(--border-subtle); font-family: var(--font-mono); font-size: 0.78rem; }
+    .matrix-table td { padding: 10px 14px; border: 1px solid var(--border-subtle); color: var(--text-secondary); }
+    .matrix-table tr:hover { background: rgba(255, 255, 255, 0.02); }
+    .badge-entity { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-family: var(--font-mono); font-weight: 600; background: rgba(0, 210, 255, 0.15); color: #38bdf8; border: 1px solid rgba(0, 210, 255, 0.3); }
+    .badge-store { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-family: var(--font-mono); font-weight: 600; background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+    .badge-process { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-family: var(--font-mono); font-weight: 600; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a href="/" class="brand">
+        <div class="brand-logo">
+          <img src="/assets/duck-emblem.png" alt="Duckvaulta">
+        </div>
+        <div>
+          <span class="brand-name">Duckvaulta</span>
+          <span class="brand-tag">DRAW.IO ARCHITECTURE</span>
+        </div>
+      </a>
+      <a href="/" class="btn btn-secondary" style="min-height: 34px; padding: 4px 12px; font-size: 0.78rem;">← Kembali ke Portal</a>
+    </div>
+  </header>
+
+  <main style="padding: 40px 0 80px;">
+    <div class="container">
+
+      <!-- Header Banner -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--cyan-primary); text-transform: uppercase;">
+              FILE ARSITEKTUR DRAW.IO RESMI (.DRAWIO XML)
+            </span>
+            <h1 style="font-size: 1.8rem; font-weight: 800; margin-top: 4px;">Sistem Informasi E-Parkir Plaza Andalas</h1>
+          </div>
+          <span style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--emerald-live);">● XML Valid Ready</span>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 20px;">
+          Diagram telah dirancang presisi sesuai dokumen spesifikasi Bab 3 (Flowchart Parkir Masuk & Keluar) dan Bab 4 (Data Flow Diagram Level 0 & Level 1 dengan 3 Entitas, 5 Proses, dan 4 Data Stores).
+        </p>
+
+        <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+          <a href="/drawio/flowchart-eparkir.drawio" download class="btn btn-primary">
+            <span>📥 Download Flowchart (.drawio)</span>
+          </a>
+          <a href="/drawio/dfd-eparkir.drawio" download class="btn btn-primary" style="background: var(--amber-accent); border-color: var(--amber-accent);">
+            <span>📥 Download DFD Level 0 & 1 (.drawio)</span>
+          </a>
+          <a href="https://app.diagrams.net/" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
+            <span>Buka Web App Draw.io ↗</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Panduan Import ke Draw.io -->
+      <div class="card">
+        <h2 class="card-title" style="margin-bottom: 16px;"><span>💡</span> Cara Membuka di Draw.io (app.diagrams.net):</h2>
+        <div class="step-box">
+          <strong>Metode 1 (Buka File Langsung):</strong> Buka <a href="https://app.diagrams.net/" target="_blank" rel="noopener noreferrer" style="color: var(--cyan-primary);">app.diagrams.net</a> &rarr; Pilih <strong>"Open Existing Diagram"</strong> &rarr; Pilih file <code>flowchart-eparkir.drawio</code> atau <code>dfd-eparkir.drawio</code> yang telah kamu unduh.
+        </div>
+        <div class="step-box">
+          <strong>Metode 2 (Copy-Paste XML):</strong> Pada aplikasi Draw.io, klik menu <strong>Arrange &rarr; Insert &rarr; Advanced &rarr; From Text...</strong> (atau <code>Ctrl + Shift + V</code>), lalu tempelkan teks XML dari kotak kode di bawah ini, dan klik <strong>Insert</strong>.
+        </div>
+      </div>
+
+      <!-- Tabbed Viewer & XML Inspector -->
+      <div class="card">
+        <div class="tab-bar">
+          <button class="tab-btn active" data-pane="pane-flowchart">1. Flowchart Parkir Masuk &amp; Keluar</button>
+          <button class="tab-btn" data-pane="pane-dfd-l0">2. DFD Level 0 (Context Diagram)</button>
+          <button class="tab-btn" data-pane="pane-dfd-l1">3. DFD Level 1 (Proses Rinci &amp; Data Store)</button>
+        </div>
+
+        <!-- PANE 1: FLOWCHART -->
+        <div class="pane active" id="pane-flowchart">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 style="font-size: 1.1rem; color: var(--text-white);">Spesifikasi Flowchart (Bab 3):</h3>
+            <a href="/drawio/flowchart-eparkir.drawio" download class="btn btn-secondary" style="min-height: 32px; padding: 4px 12px; font-size: 0.78rem;">Download .drawio</a>
+          </div>
+          <ul style="margin-left: 20px; color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 18px;">
+            <li><strong>Parkir Masuk:</strong> Percabangan Member (Scan Kartu &rarr; Validasi &rarr; Catat Log) vs Non-Member (Tombol Print &rarr; Generate Token/QR &rarr; Simpan DB &rarr; Cetak Karcis) &rarr; Palang Terbuka.</li>
+            <li><strong>Parkir Keluar & Kasir:</strong> Scan Karcis / Menu Member &rarr; Hitung Durasi <code>ceil(Keluar - Masuk)</code> &rarr; Hitung Total <code>Tarif Dasar + (Durasi-1)*Tarif Per Jam</code> &rarr; Input Uang Tunai &rarr; Validasi <code>Uang Tunai >= Total</code> &rarr; Hitung Kembalian &rarr; Cetak Invoice & Buka Palang.</li>
+          </ul>
+
+          <div style="position: relative;">
+            <button class="copy-btn" id="copy-fc-btn">Copy XML</button>
+            <pre class="code-box" id="fc-xml-code">Memuat XML Flowchart...</pre>
+          </div>
+        </div>
+
+        <!-- PANE 2: DFD LEVEL 0 -->
+        <div class="pane" id="pane-dfd-l0">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 style="font-size: 1.1rem; color: var(--text-white);">Spesifikasi DFD Level 0 / Context Diagram (Bab 4.1):</h3>
+            <a href="/drawio/dfd-eparkir.drawio" download class="btn btn-secondary" style="min-height: 32px; padding: 4px 12px; font-size: 0.78rem;">Download .drawio</a>
+          </div>
+          <ul style="margin-left: 20px; color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 18px;">
+            <li><strong>Entitas Eksternal:</strong> USER (Member/Non-Member), PETUGAS KASIR (Pintu Keluar), dan SUPER ADMIN.</li>
+            <li><strong>Proses Utama:</strong> <code>0.0 SISTEM INFORMASI E-PARKIR (PLAZA ANDALAS)</code>.</li>
+            <li><strong>Aliran Data:</strong> Permintaan Print Token, Karcis QR, Kredensial Login, Transaksi Uang Tunai, Invoice Pembayaran, Kartu Member, dan Laporan Rekapitulasi Keuangan Terpusat.</li>
+          </ul>
+
+          <div style="position: relative;">
+            <button class="copy-btn" id="copy-dfd-btn">Copy XML (Multi-Page)</button>
+            <pre class="code-box" id="dfd-xml-code">Memuat XML DFD...</pre>
+          </div>
+        </div>
+
+        <!-- PANE 3: DFD LEVEL 1 -->
+        <div class="pane" id="pane-dfd-l1">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 style="font-size: 1.1rem; color: var(--text-white);">Spesifikasi DFD Level 1 / Rincian Proses & Data Store (Bab 4.2):</h3>
+            <a href="/drawio/dfd-eparkir.drawio" download class="btn btn-secondary" style="min-height: 32px; padding: 4px 12px; font-size: 0.78rem;">Download .drawio</a>
+          </div>
+          <ul style="margin-left: 20px; color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 18px;">
+            <li><strong>5 Proses Inti:</strong> 1.0 Autentikasi & Reset Password &bull; 2.0 Manajemen Akun & Member &bull; 3.0 Registrasi Parkir Masuk &bull; 4.0 Transaksi Pembayaran &bull; 5.0 Pelaporan Transaksi.</li>
+            <li><strong>4 Data Stores:</strong> <code>D1: users</code>, <code>D2: members</code>, <code>D3: parking_transactions</code>, <code>D4: member_payments</code>.</li>
+          </ul>
+
+          <div style="background: var(--bg-card); padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border-accent); font-family: var(--font-mono); font-size: 0.8rem; color: var(--emerald-live);">
+            ✓ File <strong>dfd-eparkir.drawio</strong> adalah berkas multi-halaman resmi. Saat di-import ke Draw.io, Halaman 1 akan otomatis membuka DFD Level 0 (Diagram Konteks) dan Halaman 2 membuka DFD Level 1 (Rincian Proses & Data Store)!
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Tab switcher
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      const panes = document.querySelectorAll('.pane');
+
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          tabBtns.forEach(b => b.classList.remove('active'));
+          panes.forEach(p => p.classList.remove('active'));
+          btn.classList.add('active');
+          const target = btn.getAttribute('data-pane');
+          document.getElementById(target)?.classList.add('active');
+        });
+      });
+
+      // Fetch and display XMLs
+      let fcXmlText = '';
+      let dfdXmlText = '';
+
+      try {
+        const fcRes = await fetch('/drawio/flowchart-eparkir.drawio');
+        if (!fcRes.ok) throw new Error('HTTP ' + fcRes.status);
+        fcXmlText = await fcRes.text();
+        document.getElementById('fc-xml-code').textContent = fcXmlText;
+      } catch(e) {
+        document.getElementById('fc-xml-code').textContent = 'Gagal memuat XML Flowchart: ' + e.message;
+      }
+
+      try {
+        const dfdRes = await fetch('/drawio/dfd-eparkir.drawio');
+        if (!dfdRes.ok) throw new Error('HTTP ' + dfdRes.status);
+        dfdXmlText = await dfdRes.text();
+        document.getElementById('dfd-xml-code').textContent = dfdXmlText;
+      } catch(e) {
+        document.getElementById('dfd-xml-code').textContent = 'Gagal memuat XML DFD: ' + e.message;
+      }
+
+      // Copy buttons
+      document.getElementById('copy-fc-btn').addEventListener('click', () => {
+        navigator.clipboard.writeText(fcXmlText);
+        const b = document.getElementById('copy-fc-btn');
+        b.textContent = '✓ Copied!';
+        setTimeout(() => b.textContent = 'Copy XML', 2000);
+      });
+
+      document.getElementById('copy-dfd-btn').addEventListener('click', () => {
+        navigator.clipboard.writeText(dfdXmlText);
+        const b = document.getElementById('copy-dfd-btn');
+        b.textContent = '✓ Copied!';
+        setTimeout(() => b.textContent = 'Copy XML (Multi-Page)', 2000);
+      });
+    });
+  </script>
+</body>
+</html>
